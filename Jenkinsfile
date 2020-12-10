@@ -44,61 +44,34 @@ node('master'){
   
         echo "Environnement : ${env}"          // cette variable permet de choisir sur quel serveur on va deployer 
 
-        
-        SVN_CREDENTIALS_ID='jenkins'
-        GCP_SERVICE_ACCOUNT_PUSH_ID='jenkins-linkinnov-imagepush'
-        GCP_JSON_SVN_PATH=''
-        GCP_JSON_LOCAL_PATH=''
-        // BUILD_CONTAINER_IMAGE_NAME='mkenney/npm:node-8-debian'
-        BUILD_CONTAINER_IMAGE_NAME='node:8-stretch'
-        PUSH_CONTAINER_IMAGE_NAME='cloudsdk-maven-java8-docker'
-
-        //MCS_DOCKER_REGISTRY_URL = 'eu.gcr.io/'+GCP_PROJECT_ID+'/'
-        DOCKERFILE_PATH = './build_scripts/Dockerfile'
-
-        MCS_CONTAINER_IMAGE_FULLNAME='' //do not set. jenkins will set it
 
         USERS_TO_NOTIFY = 'hichem.elamine@breakpoint-technology.fr'
              
        
-       //variable pour server         qualif -------prod
-       //varibale pour idprojet       linkinnov-env-test --------- linkinnov-221611
-       //variable pour cluster        linkinnov-qualif-app--------linkinnov-prod-app 
-       //variable pour jsonfile       .............98c45.json -------         ....573.json
+       //variable pour server         qualif -------prod									necessaire ici pour eviter BRANCH/TAG  sur SVN 
+       //varibale pour idprojet       linkinnov-env-test --------- linkinnov-221611			non necessaire ici
+       //variable pour cluster        linkinnov-qualif-app--------linkinnov-prod-app 		non necessaire ici
+       //variable pour jsonfile       .............98c45.json -------         ....573.json	non necessaire ici
               
        
 
        if(env=="Qualif"){
        server='qualif'
-       idproject="linkinnov-env-test"
-       cluster="linkinnov-qualif-app"
-       jsonfile='file-linkinnov-env-test-a00032f98c45.json'
        } 
        else if(env=='Prod'){
-       server='prod'
-       idproject="linkinnov-221611"
-       cluster="linkinnov-prod-app"
-       jsonfile='file-linkinnov-221611-1b9d82fcb573.json'       
+       server='prod'       
        } 
        else{
-       server='qualif'
-       idproject="linkinnov-env-test"
-       cluster="linkinnov-qualif-app"
-       jsonfile='file-linkinnov-env-test-a00032f98c45.json'       
+       server='qualif'      
        }  
 
        
    echo "Environnement : ${env}" 
-   echo "server    =   ${server}"
-   echo "idproject =   ${idproject}"
-   echo "cluster   =   ${cluster}"
-   echo "jsonfile  =   ${jsonfile}"      
-    
-   }
+   echo "server    =   ${server}"  
    
    }
    
-//////////////////////////////////////////////////////////////////////
+   }
 
 
 // Lancement du pipeline sur un esclave dÃ©fini dans la configuration projet-settings
@@ -324,12 +297,9 @@ node(projet_settings.jenkins.node) {
                             gcloud config set project ${GOOGLE_CLOUD_PROJECT_ID}
                             gcloud -q auth activate-service-account --key-file $GOOGLE_CLOUD_CREDENTIAL
                             gcloud auth configure-docker
-
                             export GOOGLE_APPLICATION_CREDENTIALS=${GOOGLE_CLOUD_CREDENTIAL}
-
                             gcloud config list
                             docker push ${APPLICATION_IMAGE_FULL}
-
                             docker tag ${APPLICATION_IMAGE_FULL} ${APPLICATION_IMAGE_FULL}.b${BUILD_NUMBER}
                             docker push ${APPLICATION_IMAGE_FULL}.b${BUILD_NUMBER}
                             
@@ -360,6 +330,7 @@ node(projet_settings.jenkins.node) {
         }
     }
 }
+
 
 def publish() {
     stage("publish to nexus") {
@@ -408,13 +379,10 @@ def operateToKubernetes(PROCEDURE, projet_settings, google_credential, pom) {
                         stage('Operate Application in Kubernetes') {
                             sh '''
                             find .
-
                             gcloud auth activate-service-account --key-file ${GOOGLE_CLOUD_CREDENTIAL} --project ${GOOGLE_CLOUD_PROJECT_ID}
                             gcloud config set compute/region europe-west1
                             gcloud config set compute/zone europe-west1-b
-
                             EIP_ADDRESS_1=$(gcloud compute addresses list --filter="name=${EIP_ADDRESS_NAME_1}" --format="value(address)")
-
                             echo 'change image name in k8s config !'
                             sed -i.bak "s#GOOGLE_CLOUD_CONTAINER_REGISTRY_IMAGE_NAME#${APPLICATION_IMAGE_FULL}#" configs/k8s/${ENV_NAME}/*.yaml
                             echo 'change application name in k8s config !'
@@ -422,11 +390,8 @@ def operateToKubernetes(PROCEDURE, projet_settings, google_credential, pom) {
                             sed -i.bak "s#{{LINKINNOV_STAGE}}#${ENV_NAME}#" configs/k8s/${ENV_NAME}/*.yaml
                             sed -i.bak "s#{{LINKINNOV_NAMESPACE}}#${ENV_NAME}#" configs/k8s/${ENV_NAME}/*.yaml
                             sed -i.bak "s#{{EIP_ADDRESS_1}}#${EIP_ADDRESS_1}#" configs/k8s/${ENV_NAME}/*.yaml
-
                             gcloud container clusters get-credentials ${GOOGLE_CLOUD_KUBERNETES_NAME} --zone=${GOOGLE_CLOUD_KUBERNETES_ZONE}
-
                             kubectl get ns ${GOOGLE_CLOUD_KUBERNETES_NAMESPACE} || kubectl create ns ${GOOGLE_CLOUD_KUBERNETES_NAMESPACE}
-
                             kubectl --namespace=${GOOGLE_CLOUD_KUBERNETES_NAMESPACE} apply -f configs/k8s/${ENV_NAME}/
                             '''
                         }
