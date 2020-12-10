@@ -360,7 +360,6 @@ node(projet_settings.jenkins.node) {
         }
     }
 }
-}
 
 def publish() {
     stage("publish to nexus") {
