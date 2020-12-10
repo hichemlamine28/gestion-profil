@@ -1,0 +1,640 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>com.arkeup.link_innov</groupId>
+	<artifactId>gestion-profil-mcs</artifactId>
+	<version>0.1.9-SNAPSHOT</version>
+	<packaging>jar</packaging>
+	<name>gestion-profil-mcs</name>
+	<description>Projet Spring boot pour Gestion de profil</description>
+	<parent>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>2.0.5.RELEASE</version>
+		<relativePath /> <!-- lookup parent from repository -->
+	</parent>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+		<java.version>1.8</java.version>
+		<maven.compiler.source>1.8</maven.compiler.source>
+		<maven.compiler.target>1.8</maven.compiler.target>
+		<google.maps.service.version>0.2.7</google.maps.service.version>
+		<io.springfox.swagger.version>2.8.0</io.springfox.swagger.version>
+		<com.fasterxml.jackson.core.version>2.9.1</com.fasterxml.jackson.core.version>
+		<org.mapstruct.version>1.2.0.Final</org.mapstruct.version>
+		<pmdVersion>6.8.0</pmdVersion>
+		<!-- automatically run annotation processors within the incremental compilation -->
+		<m2e.apt.activation>jdt_apt</m2e.apt.activation>
+		<!-- scm:svn:https://tools.arkeup.com/svn/{path to repo} -->
+		<!-- DO NOT CHANGE THE custom.scm VALUES !!!!! -->
+		<!-- these values muse be set using mvn. example : mvn -Dcustom.scm.connection=url 
+			-Dcustom.scm.developerConnection=url -Dcustom.scm.url=url clean package -->
+		<custom.scm.connection>null</custom.scm.connection> <!-- DO NOT CHANGE !!!!! -->
+		<custom.scm.developerConnection>null</custom.scm.developerConnection> <!-- DO NOT CHANGE !!!!! -->
+		<custom.scm.url>null</custom.scm.url> <!-- DO NOT CHANGE !!!!! -->
+		<nexus.url>null</nexus.url> <!-- DO NOT CHANGE !!!!! -->
+		<nexus.repository.url>null</nexus.repository.url> <!-- DO NOT CHANGE !!!!! -->
+		<nexus.repository.id>null</nexus.repository.id> <!-- DO NOT CHANGE !!!!! -->
+	</properties>
+	<profiles>
+		<profile>
+			<!-- FIXME à set par les dev -->
+			<!-- FIXME for development declare this as default, see DEV profile -->
+			<id>LOCAL</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+		</profile>
+		<profile>
+			<id>EXTERNAL</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>properties-maven-plugin</artifactId>
+						<version>1.0.0</version>
+						<executions>
+							<execution>
+								<phase>initialize</phase>
+								<goals>
+									<goal>read-project-properties</goal>
+								</goals>
+								<configuration>
+									<files>
+										<file>${basedir}/target_properties/conf/application.properties</file>
+									</files>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>com.google.code.maven-replacer-plugin</groupId>
+						<artifactId>replacer</artifactId>
+						<version>1.5.3</version>
+						<executions>
+							<execution>
+								<phase>generate-resources</phase>
+								<goals>
+									<goal>replace</goal>
+								</goals>
+							</execution>
+						</executions>
+						<configuration>
+							<file>${basedir}/src/main/resources/application.properties</file>
+							<replacements>
+
+								<replacement>
+									<token>server.port=(.*)</token>
+									<value>server.port=${server.port}</value>
+								</replacement>
+
+								<replacement>
+									<token>mongodb.default.host=(.*)</token>
+									<value>mongodb.default.host=${mongodb.default.host}</value>
+								</replacement>
+								<replacement>
+									<token>mongodb.default.port=(.*)</token>
+									<value>mongodb.default.port=${mongodb.default.port}</value>
+								</replacement>
+								<replacement>
+									<token>mongodb.default.username=(.*)</token>
+									<value>mongodb.default.username=${mongodb.default.username}</value>
+								</replacement>
+								<replacement>
+									<token>mongodb.default.password=(.*)</token>
+									<value>mongodb.default.password=${mongodb.default.password}</value>
+								</replacement>
+
+								<replacement>
+									<token>mongodb.oauth2.host=(.*)</token>
+									<value>mongodb.oauth2.host=${mongodb.oauth2.host}</value>
+								</replacement>
+								<replacement>
+									<token>mongodb.oauth2.port=(.*)</token>
+									<value>mongodb.oauth2.port=${mongodb.oauth2.port}</value>
+								</replacement>
+								<replacement>
+									<token>mongodb.oauth2.username=(.*)</token>
+									<value>mongodb.oauth2.username=${mongodb.oauth2.username}</value>
+								</replacement>
+								<replacement>
+									<token>mongodb.oauth2.password=(.*)</token>
+									<value>mongodb.oauth2.password=${mongodb.oauth2.password}</value>
+								</replacement>
+
+								<replacement>
+									<token>mongodb.secure=(.*)</token>
+									<value>mongodb.secure=${mongodb.secure}</value>
+								</replacement>
+								<replacement>
+									<token>mongodb.admin=(.*)</token>
+									<value>mongodb.admin=${mongodb.admin}</value>
+								</replacement>
+
+
+								<replacement>
+									<token>es.host=(.*)</token>
+									<value>es.host=${es.host}</value>
+								</replacement>
+								<replacement>
+									<token>es.port=(.*)</token>
+									<value>es.port=${es.port}</value>
+								</replacement>
+
+								<replacement>
+									<token>ldap.url=(.*)</token>
+									<value>ldap.url=${ldap.url}</value>
+								</replacement>
+								<replacement>
+									<token>ldap.userDn=(.*)</token>
+									<value>ldap.userDn=${ldap.userDn}</value>
+								</replacement>
+								<replacement>
+									<token>ldap.password=(.*)</token>
+									<value>ldap.password=${ldap.password}</value>
+								</replacement>
+
+								<replacement>
+									<token>spring.data.neo4j.uri=(.*)</token>
+									<value>spring.data.neo4j.uri=${spring.data.neo4j.uri}</value>
+								</replacement>
+								<replacement>
+									<token>spring.data.neo4j.uris=(.*)</token>
+									<value>spring.data.neo4j.uris=${spring.data.neo4j.uris}</value>
+								</replacement>
+								<replacement>
+									<token>spring.data.neo4j.username=(.*)</token>
+									<value>spring.data.neo4j.username${spring.data.neo4j.username}</value>
+								</replacement>
+								<replacement>
+									<token>spring.data.neo4j.password=(.*)</token>
+									<value>spring.data.neo4j.password=${spring.data.neo4j.password}</value>
+								</replacement>
+
+								<replacement>
+									<token>spring.rabbitmq.host=(.*)</token>
+									<value>spring.rabbitmq.host=${spring.rabbitmq.host}</value>
+								</replacement>
+								<replacement>
+									<token>spring.rabbitmq.port=(.*)</token>
+									<value>spring.rabbitmq.port=${spring.rabbitmq.port}</value>
+								</replacement>
+								<replacement>
+									<token>spring.rabbitmq.username=(.*)</token>
+									<value>spring.rabbitmq.username=${spring.rabbitmq.username}</value>
+								</replacement>
+								<replacement>
+									<token>spring.rabbitmq.password=(.*)</token>
+									<value>spring.rabbitmq.password=${spring.rabbitmq.password}</value>
+								</replacement>
+								<replacement>
+									<token>spring.rabbitmq.notification.action.queue=(.*)</token>
+									<value>spring.rabbitmq.notification.action.queue=${spring.rabbitmq.notification.action.queue}</value>
+								</replacement>
+								<replacement>
+									<token>spring.rabbitmq.listener.simple.auto-startup=(.*)</token>
+									<value>spring.rabbitmq.listener.simple.auto-startup=${spring.rabbitmq.listener.simple.auto-startup}</value>
+								</replacement>
+								<replacement>
+									<token>connectionfactory.instanceUri=(.*)</token>
+									<value>connectionfactory.instanceUri=${connectionfactory.instanceUri}</value>
+								</replacement>
+
+								<replacement>
+									<token>chat-mcs.url=(.*)</token>
+									<value>chat-mcs.url=${chat-mcs.url}</value>
+								</replacement>
+								<replacement>
+									<token>reseau-social.mcs.url=(.*)</token>
+									<value>reseau-social.mcs.url=${reseau-social.mcs.url}</value>
+								</replacement>
+								<replacement>
+									<token>gestion-media.mcs.url=(.*)</token>
+									<value>gestion-media.mcs.url=${gestion-media.mcs.url}</value>
+								</replacement>
+								<replacement>
+									<token>rabbitmq.mcs.url=(.*)</token>
+									<value>rabbitmq.mcs.url=${rabbitmq.mcs.url}</value>
+								</replacement>
+								<replacement>
+									<token>notification.mcs.url=(.*)</token>
+									<value>notification.mcs.url=${notification.mcs.url}</value>
+								</replacement>
+								<replacement>
+									<token>announce.mcs.url=(.*)</token>
+									<value>announce.mcs.url=${announce.mcs.url}</value>
+								</replacement>
+								<replacement>
+									<token>gestion-droit.mcs.url=(.*)</token>
+									<value>gestion-droit.mcs.url=${gestion-droit.mcs.url}</value>
+								</replacement>
+								<replacement>
+									<token>abonnement.mcs.url=(.*)</token>
+									<value>abonnement.mcs.url=${abonnement.mcs.url}</value>
+								</replacement>
+
+								<replacement>
+									<token>spring.servlet.multipart.max-file-size=(.*)</token>
+									<value>spring.servlet.multipart.max-file-size=${spring.servlet.multipart.max-file-size}</value>
+								</replacement>
+								<replacement>
+									<token>spring.servlet.multipart.max-request-size=(.*)</token>
+									<value>spring.servlet.multipart.max-request-size=${spring.servlet.multipart.max-request-size}</value>
+								</replacement>
+
+							</replacements>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+	<scm>
+		<connection>
+			${custom.scm.connection}
+		</connection>
+		<developerConnection>
+			${custom.scm.developerConnection}
+		</developerConnection>
+		<url>
+			${custom.scm.url}
+		</url>
+	</scm>
+	<!-- MAVEN COMMAND TO DEPLOY -->
+	<!-- mvn clean deploy -Dnexus.url=https://nexus3.arkeup.com/ -Dnexus.repository.url=https://nexus3.arkeup.com/repository/arkeup/ 
+		-Dnexus.repository.id=arkeup_repository_v3 -->
+	<distributionManagement>
+		<snapshotRepository>
+			<id>${nexus.repository.id}</id>
+			<url>${nexus.repository.url}</url>
+		</snapshotRepository>
+		<repository>
+			<id>${nexus.repository.id}</id>
+			<url>${nexus.repository.url}</url>
+		</repository>
+	</distributionManagement>
+	<dependencies>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-actuator</artifactId>
+		</dependency>
+		<!-- SECURITY -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-security</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.ldap</groupId>
+			<artifactId>spring-ldap-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-ldap</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.unboundid</groupId>
+			<artifactId>unboundid-ldapsdk</artifactId>
+		</dependency>
+		<!-- OAuth2 -->
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-jwt</artifactId>
+			<version>1.0.7.RELEASE</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.security.oauth</groupId>
+			<artifactId>spring-security-oauth2</artifactId>
+			<version>2.1.0.RELEASE</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-openfeign</artifactId>
+			<version>2.0.2.RELEASE</version>
+		</dependency>
+		<!-- <dependency> -->
+		<!-- <groupId>org.springframework.security</groupId> -->
+		<!-- <artifactId>spring-security-oauth2-client</artifactId> -->
+		<!-- </dependency> -->
+		<!--<dependency> -->
+		<!--<groupId>org.springframework.security</groupId> -->
+		<!--<artifactId>spring-security-oauth2-jose</artifactId> -->
+		<!--</dependency> -->
+		<dependency>
+			<groupId>org.springframework.security.oauth.boot</groupId>
+			<artifactId>spring-security-oauth2-autoconfigure</artifactId>
+			<version>2.0.5.RELEASE</version>
+		</dependency>
+		<!-- SECURITY -->
+		<dependency>
+			<groupId>io.springfox</groupId>
+			<artifactId>springfox-swagger-ui</artifactId>
+			<version>${io.springfox.swagger.version}</version>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>io.springfox</groupId>
+			<artifactId>springfox-swagger2</artifactId>
+			<version>${io.springfox.swagger.version}</version>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>log4j-over-slf4j</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.perf4j</groupId>
+			<artifactId>perf4j</artifactId>
+			<version>0.9.16</version>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-core</artifactId>
+			<version>${com.fasterxml.jackson.core.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+			<version>${com.fasterxml.jackson.core.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.dataformat</groupId>
+			<artifactId>jackson-dataformat-csv</artifactId>
+			<version>${com.fasterxml.jackson.core.version}</version>
+		</dependency>
+		<!-- mongodb dependencies -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-mongodb</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.github.mongobee</groupId>
+			<artifactId>mongobee</artifactId>
+			<version>0.13</version>
+		</dependency>
+		<!-- Elastic Search dependencies -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-elasticsearch</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.elasticsearch.client</groupId>
+			<artifactId>transport</artifactId>
+			<version>${elasticsearch.version}</version>
+		</dependency>
+		<!-- LDAP dependencies -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-ldap</artifactId>
+		</dependency>
+		<!-- Neo4j dependencies -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-neo4j</artifactId>
+		</dependency>
+		<!-- mapper un objet vers un autre -->
+		<dependency>
+			<groupId>com.googlecode.jmapper-framework</groupId>
+			<artifactId>jmapper-core</artifactId>
+			<version>1.6.0.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.mapstruct</groupId>
+			<artifactId>mapstruct-jdk8</artifactId>
+			<version>${org.mapstruct.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.mapstruct</groupId>
+			<artifactId>mapstruct-processor</artifactId>
+			<version>${org.mapstruct.version}</version>
+		</dependency>
+		<!--nécessaire pour fonctionner sur java 9+ -->
+		<dependency>
+			<groupId>javax.xml.bind</groupId>
+			<artifactId>jaxb-api</artifactId>
+			<version>2.3.1</version>
+		</dependency>
+		<dependency>
+			<groupId>com.sun.xml.bind</groupId>
+			<artifactId>jaxb-core</artifactId>
+			<version>2.3.0</version>
+		</dependency>
+		<dependency>
+			<groupId>com.sun.xml.bind</groupId>
+			<artifactId>jaxb-impl</artifactId>
+			<version>2.3.1</version>
+		</dependency>
+		<dependency>
+			<groupId>javax.activation</groupId>
+			<artifactId>activation</artifactId>
+			<version>1.1.1</version>
+		</dependency>
+		<!-- TEST LIBS -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<!-- RabbitMQ -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-amqp</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-thymeleaf</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.aspectj</groupId>
+			<artifactId>aspectjtools</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.thedeanda</groupId>
+			<artifactId>lorem</artifactId>
+			<version>2.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.qpid</groupId>
+			<artifactId>proton-j</artifactId>
+			<version>0.31.0</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.json/json -->
+		<dependency>
+			<groupId>org.json</groupId>
+			<artifactId>json</artifactId>
+			<version>20160810</version>
+		</dependency>
+		<!-- Notification Data : to use this dependency get notification data from 
+			svn and build it locally, this will automatically add the jar to the maven 
+			repository -->
+		<dependency>
+			<groupId>com.arkeup.link_innov</groupId>
+			<artifactId>notification-data</artifactId>
+			<version>0.1.7</version>
+		</dependency>
+		<dependency>
+			<groupId>javax.jms</groupId>
+			<artifactId>javax.jms-api</artifactId>
+			<version>2.0.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.qpid</groupId>
+			<artifactId>qpid-jms-client</artifactId>
+			<version>0.40.0</version>
+		</dependency>
+		<dependency>
+			<groupId>com.opencsv</groupId>
+			<artifactId>opencsv</artifactId>
+			<version>4.5</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.jsoup</groupId>
+			<artifactId>jsoup</artifactId>
+			<version>1.11.3</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.jayway.jsonpath</groupId>
+			<artifactId>json-path</artifactId>
+			<version>2.4.0</version>
+		</dependency>
+
+		<!-- Start library Apache POI -->
+		<dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi</artifactId>
+			<version>3.9</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi-ooxml</artifactId>
+			<version>3.9</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi-ooxml-schemas</artifactId>
+			<version>3.9</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.arkeup.modules</groupId>
+			<artifactId>logging</artifactId>
+			<version>0.0.1</version>
+		</dependency>
+		<!-- End library Apache POI -->
+	</dependencies>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<annotationProcessorPaths>
+						<path>
+							<groupId>org.mapstruct</groupId>
+							<artifactId>mapstruct-processor</artifactId>
+							<version>${org.mapstruct.version}</version>
+						</path>
+					</annotationProcessorPaths>
+					<compilerArgs>
+						<compilerArg>
+							-Amapstruct.suppressGeneratorTimestamp=true
+						</compilerArg>
+						<compilerArg>
+							-Amapstruct.suppressGeneratorVersionInfoComment=true
+						</compilerArg>
+						<compilerArg>
+							-Amapstruct.defaultComponentModel=spring
+						</compilerArg>
+					</compilerArgs>
+				</configuration>
+			</plugin>
+			<!-- CODE COVERAGE PLUGIN -->
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>0.8.2</version>
+				<executions>
+					<execution>
+						<id>default-prepare-agent</id>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>default-report</id>
+						<phase>prepare-package</phase>
+						<goals>
+							<goal>report</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<!-- SOURCE CODE STATIC ANALYSIS -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-pmd-plugin</artifactId>
+				<version>3.11.0</version>
+				<configuration>
+					<targetJdk>${java.version}</targetJdk>
+					<failOnViolation>true</failOnViolation>
+					<failurePriority>1</failurePriority>
+					<printFailingErrors>true</printFailingErrors>
+					<outputDirectory>${project.build.directory}/pmd</outputDirectory>
+					<rulesets>
+						<!-- A rule set, that comes bundled with PMD -->
+						<ruleset>/category/java/bestpractices.xml</ruleset>
+						<ruleset>/category/java/codestyle.xml</ruleset>
+						<ruleset>/category/java/design.xml</ruleset>
+						<ruleset>/category/java/errorprone.xml</ruleset>
+						<ruleset>/category/java/multithreading.xml</ruleset>
+						<ruleset>/category/java/performance.xml</ruleset>
+						<ruleset>/category/java/security.xml</ruleset>
+					</rulesets>
+					<excludes>
+						<exclude>**/SSLUtilities.java</exclude>
+						<exclude>**/User**.java</exclude>
+						<exclude>**/**Profil**.java</exclude>
+					</excludes>
+				</configuration>
+				<dependencies>
+					<dependency>
+						<groupId>net.sourceforge.pmd</groupId>
+						<artifactId>pmd-core</artifactId>
+						<version>${pmdVersion}</version>
+					</dependency>
+					<dependency>
+						<groupId>net.sourceforge.pmd</groupId>
+						<artifactId>pmd-java</artifactId>
+						<version>${pmdVersion}</version>
+					</dependency>
+				</dependencies>
+				<executions>
+					<execution>
+						<id>check pmd and fail</id>
+						<phase>compile</phase>
+						<goals>
+							<goal>check</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+</project>

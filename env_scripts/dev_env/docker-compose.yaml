@@ -1,0 +1,91 @@
+version: '3'
+services:
+  mongo-db-dev:
+    image : "mongo"
+    hostname: mongo
+    ports:
+      - "35001:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: mongodbUser
+      MONGO_INITDB_ROOT_PASSWORD: mongodbPassword
+    networks:
+      default:
+        aliases:
+            - mongo
+  elastic-search-dev:
+    image: "docker.elastic.co/elasticsearch/elasticsearch:5.5.3"
+    hostname: es
+    ports:
+      - "35011:9200"
+      - "35012:9300"
+    environment:
+      - discovery.type=single-node
+      - cluster.name=link-innov-ES-cluster
+      - xpack.security.enabled=false
+    networks:
+      default:
+        aliases:
+          - es
+  elastic-search-hq-dev:
+    image: "elastichq/elasticsearch-hq"
+    hostname: eshq
+    ports:
+      - "35013:5000"
+    networks:
+      default:
+        aliases:
+          - eshq
+  neo4j-dev:
+    image: "neo4j"
+    hostname: neo4j
+    ports:
+      - "35021:7473"
+      - "35022:7474"
+      - "35023:7687"
+    environment:
+      - NEO4J_AUTH=neo4j/admin
+    networks:
+      default:
+        aliases:
+          - neo4j
+  openLdap-dev:
+    image: "osixia/openldap:1.2.2"
+    hostname: openldap
+    ports:
+      - "35031:389"
+      - "35032:636"
+    environment:
+      - LDAP_ORGANISATION=Link_Innov
+      - LDAP_DOMAIN=linkinnov.com
+    volumes:
+      - ./init_script/ldap:/container/service/slapd/assets/config/bootstrap/ldif/custom
+    command: --copy-service
+    networks:
+      default:
+        aliases:
+          - openldap
+  php-ldap-admin-dev:
+    image: "osixia/phpldapadmin:0.7.2"
+    hostname: ldapadmin
+    ports:
+      - "35033:443"
+    environment:
+      - PHPLDAPADMIN_LDAP_HOSTS=openldap
+    networks:
+      default:
+        aliases:
+          - ldapadmin
+  rabbitmq-dev:
+    image: rabbitmq:3.7.8-management-custom
+    build:
+      context: .
+      dockerfile: ./init_script/rabbitmq/Dockerfile
+    hostname: rabbitmq
+    ports:
+      - "35041:5672"
+      - "35042:15672"
+      - "35043:15674"
+    networks:
+      default:
+        aliases:
+            - rabbitmq

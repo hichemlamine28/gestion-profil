@@ -1,0 +1,90 @@
+version: '3'
+services:
+  mongo-db-test:
+    image : "mongo"
+    hostname: mongo
+    ports:
+      - "37001:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: mongodbUser
+      MONGO_INITDB_ROOT_PASSWORD: mongodbPassword
+    networks:
+      default:
+        aliases:
+            - mongo
+  elastic-search-test:
+    image: "docker.elastic.co/elasticsearch/elasticsearch:5.5.3"
+    hostname: es
+    ports:
+      - "37011:9200"
+      - "37012:9300"
+    environment:
+      - discovery.type=single-node
+      - cluster.name=link-innov-ES-cluster
+      - xpack.security.enabled=false
+    networks:
+      default:
+        aliases:
+          - es
+  elastic-search-hq-test:
+    image: "elastichq/elasticsearch-hq"
+    hostname: eshq
+    ports:
+      - "37013:5000"
+    networks:
+      default:
+        aliases:
+          - eshq
+  neo4j-test:
+    image: "neo4j"
+    hostname: neo4j
+    ports:
+      - "37021:7473"
+      - "37022:7474"
+      - "37023:7687"
+    environment:
+      - NEO4J_AUTH=neo4j/admin
+    networks:
+      default:
+        aliases:
+          - neo4j
+  openLdap-test:
+    image: "osixia/openldap:1.2.2"
+    hostname: openldap
+    ports:
+      - "37031:389"
+      - "37032:636"
+    environment:
+      - LDAP_ORGANISATION=Link_Innov
+      - LDAP_DOMAIN=linkinnov.com
+    volumes:
+      - ./init_script/ldap:/container/service/slapd/assets/config/bootstrap/ldif/custom
+    command: --copy-service
+    networks:
+      default:
+        aliases:
+          - openldap
+  php-ldap-admin-test:
+    image: "osixia/phpldapadmin:0.7.2"
+    hostname: ldapadmin
+    ports:
+      - "37033:443"
+    environment:
+      - PHPLDAPADMIN_LDAP_HOSTS=openldap
+    networks:
+      default:
+        aliases:
+          - ldapadmin
+  rabbitmq-test:
+    image: rabbitmq:3.7.8-management-custom
+    build:
+      context: .
+      dockerfile: ./init_script/rabbitmq/Dockerfile
+    hostname: rabbitmq
+    ports:
+      - "37041:5672"
+      - "37042:15672"
+    networks:
+      default:
+        aliases:
+            - rabbitmq

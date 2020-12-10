@@ -1,0 +1,79 @@
+<configuration scan="true" scanPeriod="30 seconds">
+
+  <property name="LOGS_FOLDER" value="/var/log/MCS_poc/" />
+ <property name="LOGS_TO_COLLECT_FOLDER" value="${LOGS_FOLDER}" />
+ 
+ <include resource="org/springframework/boot/logging/logback/console-appender.xml" />
+ 
+ <appender name="socleMail" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <!--See also http://logback.qos.ch/manual/appenders.html#RollingFileAppender-->
+    <Append>true</Append>
+    <File>${LOGS_FOLDER}/mail.log</File>
+    <encoder>
+      <pattern>%d{ISO8601}-%-15.-15X{IdLogin}-%1.1X{START_END}-%m%n</pattern>
+    </encoder>
+     <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      <!-- rollover daily -->
+      <fileNamePattern>${LOGS_TO_COLLECT_FOLDER}/mail-%d{yyyy-MM-dd-HH}-%i.log.zip</fileNamePattern>
+      <timeBasedFileNamingAndTriggeringPolicy
+            class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+        <!-- or whenever the file size reaches 100MB -->
+        <maxFileSize>15MB</maxFileSize>
+      </timeBasedFileNamingAndTriggeringPolicy>
+    </rollingPolicy>
+  </appender>
+  
+  <appender name="socleService" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <!--See also http://logback.qos.ch/manual/appenders.html#RollingFileAppender-->
+    <File>${LOGS_FOLDER}/service.log</File>
+    <Append>true</Append>
+    <encoder>
+      <pattern>%d{ISO8601}-%-15.-15X{IdLogin}-%1.1X{START_END}-%m%n</pattern>
+    </encoder>
+    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      <!-- rollover daily -->
+      <fileNamePattern>${LOGS_TO_COLLECT_FOLDER}/service-%d{yyyy-MM-dd-HH}-%i.log.zip</fileNamePattern>
+      <timeBasedFileNamingAndTriggeringPolicy
+            class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+        <!-- or whenever the file size reaches 100MB -->
+        <maxFileSize>15MB</maxFileSize>
+      </timeBasedFileNamingAndTriggeringPolicy>
+    </rollingPolicy>
+  </appender>
+  
+  <appender name="socleFramework" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <!--See also http://logback.qos.ch/manual/appenders.html#RollingFileAppender-->
+    <File>${LOGS_FOLDER}/framework.log</File>
+    <Append>true</Append>
+    <encoder>
+      <pattern>%d{ISO8601}-%-15.-15X{IdLogin}-%1.1X{START_END}-%m%n</pattern>
+    </encoder>
+	
+	<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      <!-- rollover daily -->
+      <fileNamePattern>${LOGS_TO_COLLECT_FOLDER}/framework-%d{yyyy-MM-dd-HH}-%i.log.zip</fileNamePattern>
+      <timeBasedFileNamingAndTriggeringPolicy
+            class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+        <!-- or whenever the file size reaches 100MB -->
+        <maxFileSize>15MB</maxFileSize>
+      </timeBasedFileNamingAndTriggeringPolicy>
+    </rollingPolicy>
+  </appender>
+    
+  <logger name="com.arkeup.link_innov.gestion_profil_mcs.service" additivity="false" level="INFO">
+    <appender-ref ref="socleService"/>
+  </logger>
+  
+   <logger name="javax.mail" level="DEBUG">
+  	<appender-ref ref="socleMail"/>
+  </logger>
+  
+  <logger name="javax.mail.smtp" level="DEBUG">
+  	<appender-ref ref="socleMail"/>
+  </logger>
+	
+  <root level="INFO">
+    <appender-ref ref="socleFramework"/>
+  </root>
+  
+</configuration>

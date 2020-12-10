@@ -1,0 +1,248 @@
+dn: ou=people,dc=linkinnov,dc=com
+objectclass: top
+objectclass: organizationalUnit
+ou: people
+
+dn: ou=groups,dc=linkinnov,dc=com
+objectclass: top
+objectclass: organizationalUnit
+ou: groups
+
+dn: ou=abonnement,ou=groups,dc=linkinnov,dc=com
+objectclass: top
+objectclass: organizationalUnit
+ou: abonnement
+
+dn: ou=premium,ou=abonnement,ou=groups,dc=linkinnov,dc=com
+objectclass: top
+objectclass: groupOfURLs
+cn: Premium
+memberURL: ldap:///ou=people,dc=linkinnov,dc=com??sub?(ou=ab_premium)
+
+dn: ou=freemium,ou=abonnement,ou=groups,dc=linkinnov,dc=com
+objectclass: top
+objectclass: groupOfURLs
+cn: Freemium
+memberURL: ldap:///ou=people,dc=linkinnov,dc=com??sub?(ou=ab_freemium)
+
+dn: ou=permission,ou=groups,dc=linkinnov,dc=com
+objectclass: top
+objectclass: organizationalUnit
+ou: permission
+
+dn: ou=perm_wall_access,ou=permission,ou=groups,dc=linkinnov,dc=com
+objectclass: top
+objectclass: organizationalUnit
+ou: premium
+ou: freemium
+
+dn: ou=perm_rewards,ou=permission,ou=groups,dc=linkinnov,dc=com
+objectclass: top
+objectclass: organizationalUnit
+ou: premium
+ou: freemium
+
+dn: ou=perm_group_create,ou=permission,ou=groups,dc=linkinnov,dc=com
+objectclass: top
+objectclass: organizationalUnit
+ou: premium
+ou: freemium
+
+dn: ou=perm_basic_profile_view,ou=permission,ou=groups,dc=linkinnov,dc=com
+objectclass: top
+objectclass: organizationalUnit
+ou: premium
+ou: freemium
+
+dn: ou=perm_level1_contact_full_profile_view,ou=permission,ou=groups,dc=linkinnov,dc=com
+objectclass: top
+objectclass: organizationalUnit
+ou: premium
+ou: freemium
+
+dn: ou=perm_level2_contact_basic_profile_view,ou=permission,ou=groups,dc=linkinnov,dc=com
+objectclass: top
+objectclass: organizationalUnit
+ou: premium
+ou: freemium
+
+dn: ou=perm_level2_contact_full_profile_view,ou=permission,ou=groups,dc=linkinnov,dc=com
+objectclass: top
+objectclass: organizationalUnit
+ou: premium
+
+dn: ou=perm_production_view,ou=permission,ou=groups,dc=linkinnov,dc=com
+objectclass: top
+objectclass: organizationalUnit
+ou: premium
+ou: freemium
+
+dn: ou=perm_production_download,ou=permission,ou=groups,dc=linkinnov,dc=com
+objectclass: top
+objectclass: organizationalUnit
+ou: premium
+
+dn: ou=perm_add_contact,ou=permission,ou=groups,dc=linkinnov,dc=com
+objectclass: top
+objectclass: organizationalUnit
+ou: premium
+ou: freemium
+
+dn: ou=perm_consult_viewers,ou=permission,ou=groups,dc=linkinnov,dc=com
+objectclass: top
+objectclass: organizationalUnit
+ou: premium
+ou: freemium
+
+dn: ou=perm_level1_chat,ou=permission,ou=groups,dc=linkinnov,dc=com
+objectclass: top
+objectclass: organizationalUnit
+ou: premium
+ou: freemium
+
+dn: ou=perm_level2_chat,ou=permission,ou=groups,dc=linkinnov,dc=com
+objectclass: top
+objectclass: organizationalUnit
+ou: premium
+ou: freemium
+
+dn: ou=perm_research_profile_visible,ou=permission,ou=groups,dc=linkinnov,dc=com
+objectclass: top
+objectclass: organizationalUnit
+ou: premium
+ou: freemium
+
+dn: ou=perm_research_profile_invisible,ou=permission,ou=groups,dc=linkinnov,dc=com
+objectclass: top
+objectclass: organizationalUnit
+ou: premium
+
+dn: ou=perm_research_results_basic_access,ou=permission,ou=groups,dc=linkinnov,dc=com
+objectclass: top
+objectclass: organizationalUnit
+ou: premium
+ou: freemium
+
+dn: ou=perm_research_results_statistics_access,ou=permission,ou=groups,dc=linkinnov,dc=com
+objectclass: top
+objectclass: organizationalUnit
+ou: premium
+
+dn: ou=perm_annonce_view,ou=permission,ou=groups,dc=linkinnov,dc=com
+objectclass: top
+objectclass: organizationalUnit
+ou: premium
+ou: freemium
+
+dn: ou=perm_annonce_publish,ou=permission,ou=groups,dc=linkinnov,dc=com
+objectclass: top
+objectclass: organizationalUnit
+ou: premium
+ou: freemium
+
+dn: ou=perm_annonce_publish_anonymous,ou=permission,ou=groups,dc=linkinnov,dc=com
+objectclass: top
+objectclass: organizationalUnit
+ou: premium
+
+dn: ou=perm_superadmin,ou=permission,ou=groups,dc=linkinnov,dc=com
+objectclass: top
+objectclass: organizationalUnit
+
+dn: ou=perm_admin,ou=permission,ou=groups,dc=linkinnov,dc=com
+objectclass: top
+objectclass: organizationalUnit
+
+dn: ou=perm_user,ou=permission,ou=groups,dc=linkinnov,dc=com
+objectclass: top
+objectclass: organizationalUnit
+
+dn: ou=perm_etl,ou=permission,ou=groups,dc=linkinnov,dc=com
+objectclass: top
+objectclass: organizationalUnit
+
+dn: ou=perm_commercial,ou=permission,ou=groups,dc=linkinnov,dc=com
+objectclass: top
+objectclass: organizationalUnit
+
+dn: ou=perm_marketing,ou=permission,ou=groups,dc=linkinnov,dc=com
+objectclass: top
+objectclass: organizationalUnit
+
+dn: ou=status,ou=groups,dc=linkinnov,dc=com
+objectclass: top
+objectclass: organizationalUnit
+ou: permission
+
+dn: ou=actif,ou=status,ou=groups,dc=linkinnov,dc=com
+objectclass: top
+objectclass: groupOfURLs
+cn: ACTIF
+memberURL: ldap:///ou=people,dc=linkinnov,dc=com??sub?(ou=status_actif)
+
+dn: ou=inactif,ou=status,ou=groups,dc=linkinnov,dc=com
+objectclass: top
+objectclass: groupOfURLs
+cn: INACTIF
+memberURL: ldap:///ou=people,dc=linkinnov,dc=com??sub?(ou=status_inactif)
+
+dn: ou=blocked,ou=status,ou=groups,dc=linkinnov,dc=com
+objectclass: top
+objectclass: groupOfURLs
+cn: BLOKCED
+memberURL: ldap:///ou=people,dc=linkinnov,dc=com??sub?(ou=status_blocked)
+
+dn: uid=20fb0afc-f958-11e8-8eb2-f2801f1b9fd1,ou=people,dc=linkinnov,dc=com
+objectclass: top
+objectclass: person
+objectclass: organizationalPerson
+objectclass: inetOrgPerson
+cn: user Test
+sn: userTest
+uid: 20fb0afc-f958-11e8-8eb2-f2801f1b9fd1
+mail: userTest@yopmail.com
+ou: ab_freemium
+ou: perm_user
+ou: status_actif
+userPassword: {SSHA}mWFr7RVBBElxlscPMfGVO1WNr8lh6yktcMneMQ==
+
+dn: uid=20fb0eda-f958-11e8-8eb2-f2801f1b9fd1,ou=people,dc=linkinnov,dc=com
+objectclass: top
+objectclass: person
+objectclass: organizationalPerson
+objectclass: inetOrgPerson
+cn: super admin
+sn: superAdmin
+uid: 20fb0eda-f958-11e8-8eb2-f2801f1b9fd1
+mail: superAdmin@yopmail.com
+ou: perm_admin
+ou: perm_superadmin
+ou: status_actif
+userPassword: {SSHA}H7rDhkg2QQoS4VFYXt24Cn9hWKneKAqCxo2zyw==
+
+dn: uid=20fb0d86-f958-11e8-8eb2-f2801f1b9fd1,ou=people,dc=linkinnov,dc=com
+objectclass: top
+objectclass: person
+objectclass: organizationalPerson
+objectclass: inetOrgPerson
+cn: admin Test
+sn: adminTest
+uid: 20fb0d86-f958-11e8-8eb2-f2801f1b9fd1
+mail: adminTest@yopmail.com
+ou: perm_admin
+ou: status_actif
+userPassword: {SSHA}OdWbnrGZVTB2lKHjUCh27f5CpIJHcCE7BTPjgw==
+
+dn: uid=20fdb0afc-fo98-11e8-8eb2-f2902f1b9fd1,ou=people,dc=linkinnov,dc=com
+objectclass: top
+objectclass: person
+objectclass: organizationalPerson
+objectclass: inetOrgPerson
+cn: user dataflow
+sn: dataflowUser
+uid: 20fdb0afc-fo98-11e8-8eb2-f2902f1b9fd1
+mail: dataflowUser@yopmail.com
+ou: perm_etl
+ou: status_actif
+userPassword: {SSHA}ikzGXupQv57EaSDLLdaSp7hNUHKTWkP+9sE6ew==
+

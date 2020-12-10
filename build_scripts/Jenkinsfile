@@ -1,0 +1,235 @@
+// donner le choix à l'utilisateur, Builder ou Monter de version
+def PROCEDURE = 'Test/Build'
+if (env.BRANCH_NAME.contains("/trunk/")) {
+    timeout(time: 30, unit: 'SECONDS') {
+        try {
+            def userInput = input(
+                    id: 'userInput', message: 'What would you like to do?', ok: 'Submit', parameters: [
+                    [$class: 'ChoiceParameterDefinition', name: 'procedure', description: '', choices: 'Test/Build\nRelease/Tag'],
+            ]
+            )
+            PROCEDURE = userInput
+        } catch (err) {
+            def user = err.getCauses()[0].getUser()
+            if ('SYSTEM' == user.toString()) { // SYSTEM means timeout
+                PROCEDURE = 'Test/Build'     // Set default Environment to 'dev'
+            } else {
+                didInput = false
+                echo "Aborted by: [${user}]"
+            }
+        }
+    }
+}
+
+
+node {
+
+    // ### BUILD PROPERTIES ###
+    properties(
+            [
+                    buildDiscarder(
+                            logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '5', numToKeepStr: '5')
+                    ),
+                    disableConcurrentBuilds(),
+                    disableResume(),
+                    pipelineTriggers([pollSCM('* * * * *')])
+            ]
+    )
+
+    stage('set environnement') {
+
+        GCP_PROJECT_ID = "linkinnov-221611"
+
+        SVN_CREDENTIALS_ID = 'jenkins'
+
+        GCP_SERVICE_ACCOUNT_PUSH_ID = 'jenkins-linkinnov-imagepush'
+        GCP_JSON_SVN_PATH = ''
+        GCP_JSON_LOCAL_PATH = ''
+        BUILD_CONTAINER_IMAGE_NAME = 'cloudsdk-maven-java8-docker-svn'
+
+
+        MCS_DOCKER_REGISTRY_URL = 'eu.gcr.io/' + GCP_PROJECT_ID + '/'
+        DOCKERFILE_PATH = './build_scripts/Dockerfile'
+        MAVEN_PARAMS = 'clean package -DskipTests'
+
+        MCS_CONTAINER_IMAGE_FULLNAME = ''
+
+        USERS_TO_NOTIFY = 'mahmoud-salim.bouyahyaoui@arkeup.com,' +
+                'brahim.ghazi@arkeup.com,' +
+                'morad.bouyahyaoui@arkeup.com,' +
+                'mino.randriamanivo@arkeup.com,' +
+                'erwann.rodier@arkeup.com,' +
+                'c.rabevelo@etechconsulting-mg.com,' +
+                's.rakotomahefa@etechconsulting-mg.com,' +
+                'm.rakotoniriana@etechconsulting-mg.com,' +
+                'j.randrianasolo@etechconsulting-mg.com,' +
+                'n.andriampisaina@etechconsulting-mg.com,' +
+                'p.rabenandriamanitra@etechconsulting-mg.com,' +
+                'e.andriamandrantomanana@etechconsulting-mg.com,' +
+                't.rabarioelina@etechconsulting-mg.com,' +
+                'b.rakotondratsimba@etechconsulting-mg.com,' +
+                'p.randrianandrasana@etechconsulting-mg.com,' +
+                'f.tojoherisoa@etechconsulting-mg.com,' +
+                'm.andriamahenimanana@etechconsulting-mg.com,' +
+                'm.harivao@etechconsulting-mg.com,' +
+                'f.rakotonjanahary@etechconsulting-mg.com,'
+    }
+        try {
+
+            stage('Checkout') {
+                checkout scm
+                def pom = readMavenPom file: 'pom.xml'
+
+
+            }
+
+
+
+            //Démarrage du container dans lequel on build l'application
+            docker.image(BUILD_CONTAINER_IMAGE_NAME).inside('''
+                                                        --net=host \
+                                                        -u root:root \
+                                                        -v /root/.m2:/root/.m2 \
+                                                        -v /root/.sonar:/root/.sonar
+                                                    ''') {
+
+                if (PROCEDURE == "Test/Build") {
+                    stage('Test/Package application') {
+                        withEnv(['MAVEN_PARAMS=' + MAVEN_PARAMS]) {
+                            sh "mvn $MAVEN_PARAMS"
+                        }
+                    }
+
+                    if (env.BRANCH_NAME.contains("/trunk/")) {
+
+                        stage('SonarQube analysis') {
+                            withSonarQubeEnv('SONARQUBE_ARKEUP') {
+                                // requires SonarQube Scanner for Maven 3.2+
+                                sh 'mvn org.sonarsource.scanner.maven:sonar-maven-plugin:3.5.0.1254:sonar'
+                            }
+                        }
+                    }
+
+                } else if (PROCEDURE == "Release/Tag") {
+                    stage('Tag / Version upgrade') {
+
+                        withEnv(['SVN_URL=' + scm.locations[0].getURL()]) {
+
+                            withCredentials([usernamePassword(credentialsId: 'jenkins', passwordVariable: 'SVN_PASSWORD', usernameVariable: 'SVN_USERNAME')]) {
+
+                                sh '''
+                                mvn -B release:clean release:prepare -DskipTests \
+                                -Dcustom.scm.connection=scm:svn:${SVN_URL} \
+                                -Dcustom.scm.developerConnection=scm:svn:${SVN_URL} \
+                                -Dcustom.scm.url=scm:svn:${SVN_URL}  \
+                                -Dusername=${SVN_USERNAME} \
+                                -Dpassword=${SVN_PASSWORD}
+                           '''
+                            }
+
+                        }
+
+                    }
+                }
+            }
+
+            if (PROCEDURE == "Test/Build") {
+                stage('Dockerize application') {
+                    def pom = readMavenPom file: 'pom.xml'
+
+                    if (env.BRANCH_NAME.contains("/trunk/")) {
+                        MCS_CONTAINER_IMAGE_NAME = pom.getArtifactId() + ':latest'
+                    } else if (env.BRANCH_NAME.contains("/tags/")) {
+                        MCS_CONTAINER_IMAGE_NAME = pom.getArtifactId() + ':' + pom.getVersion()
+                    } else {
+                        throw new Exception("Unknown BRANCH_NAME :" + env.BRANCH_NAME)
+                    }
+
+                    //MCS_CONTAINER_IMAGE_NAME = pom.getArtifactId()+':'+pom.getVersion()
+
+
+                    MCS_CONTAINER_IMAGE_FULLNAME = MCS_DOCKER_REGISTRY_URL + MCS_CONTAINER_IMAGE_NAME
+
+                    echo MCS_CONTAINER_IMAGE_FULLNAME
+
+                    SHA256SUM = sh(returnStdout: true, script: "sha256sum  ./target/" + pom.getArtifactId() + "-" + pom.getVersion() + ".jar")
+                    echo SHA256SUM
+
+                    BUILD_CMD = "build -t $MCS_CONTAINER_IMAGE_FULLNAME -f $DOCKERFILE_PATH ." +
+                            " --build-arg APP_MCS_NAME=" + pom.getArtifactId() +
+                            " --build-arg APP_GROUP_ID=" + pom.getGroupId() +
+                            " --build-arg APP_MCS_SOURCE=target " +
+
+                            " --build-arg APP_GLOBAL_PROPERTIES_SRC=external_properties/dev " +
+                            " --build-arg APP_GLOBAL_PROPERTIES_NAME=application.properties "
+
+                    // on remettra en place quand on sera capable de mettre la clé le fichier properties
+                    /*" --build-arg CERTIFICATE_STOREPASS='"+SHA256SUM +"'"+
+                " --build-arg CERTIFICATE_KEYPASS='"+SHA256SUM+ "'"*/
+                    withEnv(['BUILD_CMD=' + BUILD_CMD]) {
+                        sh '''
+                        docker ${BUILD_CMD}
+                    '''
+                    }
+
+
+                }
+
+
+                docker.image(BUILD_CONTAINER_IMAGE_NAME).inside('''
+                                                        -u root:root \
+                                                        -v /var/run/docker.sock:/var/run/docker.sock
+                                                    ''') {
+                    stage('Push Application to Google Container Registry') {
+                        withEnv(['GCP_PROJECT_ID=' + GCP_PROJECT_ID,
+                                 'MCS_CONTAINER_IMAGE_FULLNAME=' + MCS_CONTAINER_IMAGE_FULLNAME]) {
+                            withCredentials([file(credentialsId: 'jenkins-linkinnov-imagepush', variable: 'GOOGLE_CLOUD_CREDENTIAL')]) {
+                                sh '''
+                                gcloud config set project $GCP_PROJECT_ID
+                                gcloud -q auth activate-service-account --key-file $GOOGLE_CLOUD_CREDENTIAL
+                                gcloud auth configure-docker
+        
+                                export GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_CLOUD_CREDENTIAL
+        
+                                gcloud config list
+                                docker push $MCS_CONTAINER_IMAGE_FULLNAME
+                                
+                                docker rmi $MCS_CONTAINER_IMAGE_FULLNAME
+                                
+                                docker system prune --volumes -f
+                            '''
+                            }
+                        }
+                    }
+                }
+
+
+            }
+        } catch (e) {
+
+            JobNameSplit = env.JOB_NAME.split("%2F")
+            customJobName = JobNameSplit[JobNameSplit.length-1]
+            mail(to: USERS_TO_NOTIFY,
+                    subject: "Job '${customJobName}' (${env.BUILD_NUMBER}) has Failed",
+                    body: "Please go to ${env.BUILD_URL}.\n")
+
+            // Since we're catching the exception in order to report on it,
+            // we need to re-throw it, to ensure that the build is marked as failed
+            throw e
+        } finally {
+
+            stage('Clean Workspace') {
+                docker.image("alpine").inside('''
+                                          -u root:root
+                                          ''') {
+                    sh 'chmod -R 777 .'
+
+                }
+
+
+                cleanWs()
+            }
+
+        }
+
+}

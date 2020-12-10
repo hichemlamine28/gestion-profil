@@ -1,0 +1,44 @@
+@startuml
+actor Front
+participant ProfilMCS
+participant ReseauSocialMCS
+participant MissionConseilMCS
+
+
+Front -> ProfilMCS : GetFavoris(favorisType,Pageable)
+
+ProfilMCS -> ProfilMCS : getFavoris(userName,favorisType,Pageable)
+note right
+    s'il n'y a pas de "Sort" dans "Pageable"
+    trier par date de création de favoris par défaut
+end note
+alt favorisType == post
+    ProfilMCS -> ReseauSocialMCS  : getPosts(listIds)
+    ReseauSocialMCS -> ProfilMCS : returnList PostDTO
+end
+alt favorisType == annonce
+    ProfilMCS -> MissionConseilMCS  : getAnnonces(listIds)
+    MissionConseilMCS -> ProfilMCS : returnList AnnonceDTO
+end
+alt favorisType == ?
+    ProfilMCS -> ProfilMCS
+    note right
+        s'il y a d'autres type de favoris, suivre le même procédé
+        que les deux premier et appeler le bon microservice
+    end note
+
+end
+
+ProfilMCS -> ProfilMCS : fillFavorisDTOs
+note right
+    remplir chaque favorisDTO avec l'objet correspondant (Post ou Annonce ou autre)
+    FavorisDTO contiendra une variable targetDTO de type BaseDTO
+end note
+
+ProfilMCS -> Front : return PageableFavorisDTO
+
+
+
+
+
+@enduml
