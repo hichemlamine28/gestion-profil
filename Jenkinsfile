@@ -148,7 +148,7 @@ node(projet_settings.jenkins.node) {
             //                                         -u root:root \
             //                                         -v /root/.m2:/root/.m2 \
             //                                         -v /root/.sonar:/root/.sonar
-            //                                     ''') {
+            //                                     ''') 
 
             // Lancement dans un container Docker utilisant l'utilisateur Jenkins
             // Pas besoin d'Ãªtre root.
