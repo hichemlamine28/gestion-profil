@@ -320,8 +320,6 @@ node('slave') {
         operateToKubernetes(PROCEDURE, projet_settings, google_credential, pom)
 
     } catch (e) {
-        JobNameSplit = env.JOB_NAME.split("%2F")
-        customJobName = JobNameSplit[JobNameSplit.length-1]
         throw e
     } finally {
         // Etape de suppression du workspace
