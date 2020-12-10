@@ -74,9 +74,9 @@ node('master'){
    }
 
 
-// Lancement du pipeline sur un esclave dÃ©fini dans la configuration projet-settings
+// Lancement du pipeline sur un esclave 
 
-node(projet_settings.jenkins.node) {
+node('slave') {
     projet_settings = getConfigObject()
     def google_credential = getGoogleCredentialsObject(projet_settings)
     def pom = null
